@@ -2,7 +2,11 @@ import { CircularProgress } from "@mui/material";
 import React from "react";
 import styled from "styled-components";
 
-const Button = styled.div`
+// filter props so that they don't get passed to the DOM node
+const ButtonStyled = styled.div.withConfig({
+  shouldForwardProp: (prop) =>
+    !["isDisabled", "isLoading", "flex", "type"].includes(prop),
+})`
   border-radius: 10px;
   color: white;
   font-size: 14px;
@@ -33,50 +37,60 @@ const Button = styled.div`
     `
   opacity: 0.4;
   cursor: not-allowed;
+`}
 
-  `}
   ${({ isLoading }) =>
     isLoading &&
     `
     opacity: 0.8;
-  cursor: not-allowed;
+    cursor: not-allowed;
 `}
-${({ flex }) =>
+
+  ${({ flex }) =>
     flex &&
     `
     flex: 1;
 `}
 `;
 
-const button = ({
+const Button = ({
   text,
-  isLoading,
-  isDisabled,
+  isLoading = false,
+  isDisabled = false,
   rightIcon,
   leftIcon,
-  type,
+  type = "primary",
   onClick,
-  flex,
+  flex = false,
+  ...rest
 }) => {
+  const handleClick = () => {
+    if (!isDisabled && !isLoading && onClick) {
+      onClick();
+    }
+  };
+
   return (
-    <Button
-      onClick={() => !isDisabled && !isLoading && onClick()}
+    <ButtonStyled
+      onClick={handleClick}
       isDisabled={isDisabled}
       type={type}
       isLoading={isLoading}
       flex={flex}
+      {...rest}
     >
       {isLoading && (
         <CircularProgress
-          style={{ width: "18px", height: "18px", color: "inherit" }}
+          size={18}
+          style={{ color: "inherit" }}
+          thickness={4}
         />
       )}
       {leftIcon}
       {text}
-      {isLoading && <> . . .</>}
       {rightIcon}
-    </Button>
+    </ButtonStyled>
   );
 };
 
-export default button;
+export default Button;
